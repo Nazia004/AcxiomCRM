@@ -16,7 +16,7 @@ AcxiomCRM is an enterprise-grade, database-backed Customer Relationship Manageme
    - ASP.NET Core Identity with PBKDF2 password hashing.
    - Strict password policy (minimum 8 characters, requiring uppercase letters and digits).
    - Account lockout after 5 consecutive failed login attempts with a 15-minute lockout window.
-   - Anti-forgery token verification (`[ValidateAntiForgeryToken]`) across all state-altering POST endpoints.
+   - Anti-forgery token verification (`[ValidateAntiForgeryToken]`) across state-altering MVC Razor form POST requests.
    - Automatic account deactivation enforcement (deactivated accounts cannot authenticate).
 
 2. **Role-Based Access Control (RBAC)**
@@ -58,8 +58,9 @@ AcxiomCRM is an enterprise-grade, database-backed Customer Relationship Manageme
    - Date range filters: All Time, Today, This Week, This Month.
 
 9. **Audit Trail**
-   - Immutable, append-only audit logging of authentication successes/failures, account lockouts, user role changes, CRM record creations, modifications, deletions, and lead conversions.
-   - Captures User ID, Action, Module, Timestamp (UTC), IP Address, Old Value, and New Value.
+   - Append-only audit logging: Application-level audit trail capturing authentication events, failed logins, account lockouts, user role changes, CRM record creations, updates, deactivations, and lead conversions.
+   - Protected against modification: No update or deletion endpoints are exposed for audit records in the web UI or REST API.
+   - Captures User ID, Action, Module, Timestamp (UTC), IP Address, Old Value, New Value, and Result.
 
 10. **Reports & Exports**
     - Customer Master Report with CSV export.
@@ -108,11 +109,12 @@ AcxiomCRM is an enterprise-grade, database-backed Customer Relationship Manageme
    dotnet restore
    ```
 
-3. **Apply Database Migrations:**
-   ```bash
-   dotnet ef database update
-   ```
-   *(Note: The application automatically applies pending migrations and seeds default roles and sample data on startup).*
+3. **Database Migration & Seeding:**
+   - **Automatic (Default)**: On startup, `Program.cs` invokes `DbInitializer.InitializeAsync()`, which automatically applies pending EF Core migrations (`await context.Database.MigrateAsync()`) and seeds roles and test data into `app.db`.
+   - **Manual CLI (Optional)**: If you prefer to apply migrations via terminal before starting:
+     ```bash
+     dotnet ef database update
+     ```
 
 4. **Run the Application:**
    ```bash
@@ -257,6 +259,8 @@ The solution includes an automated test suite under `AcxiomCRM.Tests/` using **x
 To run all automated tests:
 ```bash
 dotnet test AcxiomCRM.Tests/AcxiomCRM.Tests.csproj
+# If running while the local web server is actively executing:
+dotnet test AcxiomCRM.Tests/AcxiomCRM.Tests.csproj --no-build
 ```
 
 ### Verified Test Cases:
@@ -305,7 +309,7 @@ To switch from SQLite to SQL Server:
 - [x] State-altering MVC actions guarded with Anti-Forgery Tokens (`ValidateAntiForgeryToken`).
 - [x] Parameterized Entity Framework Core queries preventing SQL Injection.
 - [x] Secure cookie policy configured with `HttpOnly`, `SlidingExpiration`, and expiration limits.
-- [x] Immutable, append-only audit trail capturing security events and entity modifications.
+- [x] Append-only audit trail capturing security events and entity modifications (no edit or delete actions exposed).
 
 ---
 
