@@ -309,8 +309,7 @@ To switch from SQLite to SQL Server:
 
 ---
 
-## 10. Repository & License
+## 10. Repository & Authorship
 
-- **GitHub Repository**: [https://github.com/Nazia004/AcxiomCRM](https://github.com/Nazia004/AcxiomCRM)
+- **Repository**: https://github.com/Nazia004/AcxiomCRM
 - **Author**: Nazia Quadri
-- **License**: MIT
