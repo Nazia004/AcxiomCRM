@@ -1,0 +1,70 @@
+@model FollowUp
+@{
+    ViewData["Title"] = "Follow-Up: " + Model.Subject;
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card crm-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-warning me-2"></i>Follow-Up Details</h4>
+                <div class="d-flex gap-2">
+                    <a asp-action="Edit" asp-route-id="@Model.FollowUpId" class="btn btn-primary btn-sm">Edit / Reschedule</a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+                </div>
+            </div>
+
+            <div class="bg-light p-3 rounded mb-3">
+                <h5 class="fw-bold mb-2">@Model.Subject</h5>
+                <span class="badge @(Model.Status == "Completed" ? "bg-success" : Model.Status == "Planned" ? "bg-warning text-dark" : "bg-danger") me-2">@Model.Status</span>
+                <span class="badge bg-secondary">@Model.FollowUpType</span>
+            </div>
+
+            <dl class="row small mb-4">
+                <dt class="col-sm-4 text-muted">Scheduled Time</dt>
+                <dd class="col-sm-8 fw-bold">@Model.FollowUpDate.ToString("f")</dd>
+
+                <dt class="col-sm-4 text-muted">Related Entity</dt>
+                <dd class="col-sm-8">
+                    @if (Model.Customer != null)
+                    {
+                        <span>Customer: <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.CustomerId">@Model.Customer.CustomerName</a></span>
+                    }
+                    else if (Model.Lead != null)
+                    {
+                        <span>Lead: <a asp-controller="Leads" asp-action="Details" asp-route-id="@Model.LeadId">@Model.Lead.LeadName</a></span>
+                    }
+                    else
+                    {
+                        <span>General Follow-Up</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-4 text-muted">Assigned User</dt>
+                <dd class="col-sm-8">@(Model.AssignedUser?.FullName ?? "Unassigned")</dd>
+
+                <dt class="col-sm-4 text-muted">Created Timestamp</dt>
+                <dd class="col-sm-8">@Model.CreatedDate.ToString("g")</dd>
+
+                <dt class="col-sm-4 text-muted">Remarks & Notes</dt>
+                <dd class="col-sm-8 text-break">@(string.IsNullOrEmpty(Model.Remarks) ? "No remarks." : Model.Remarks)</dd>
+            </dl>
+
+            @if (Model.Status == FollowUpStatus.Planned)
+            {
+                <div class="p-3 border rounded bg-white">
+                    <h6 class="fw-bold mb-2">Complete this Follow-Up</h6>
+                    <form asp-action="Complete" asp-route-id="@Model.FollowUpId" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-2">
+                            <textarea name="completionRemarks" class="form-control form-control-sm" rows="2" placeholder="Outcome or follow-up summary remarks..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="bi bi-check-lg me-1"></i>Mark Completed
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,130 @@
+@{
+    ViewData["Title"] = "CRM Reports";
+}
+
+<div class="mb-4">
+    <h3 class="fw-bold mb-1">CRM Reports & Analytics Hub</h3>
+    <p class="text-muted small mb-0">Operational reports, pipeline forecasting, conversion rates, and team accountability.</p>
+</div>
+
+<div class="row g-4">
+    <!-- Customer Report Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card crm-card p-4 h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3">
+                    <i class="bi bi-people-fill fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Customer Master</h5>
+                    <small class="text-muted">Account directory & status</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-4">View complete customer account records, contact directory, assigned sales owners and acquisition dates.</p>
+            <div class="mt-auto d-flex gap-2">
+                <a asp-action="Customers" class="btn btn-outline-primary btn-sm flex-grow-1">View Report</a>
+                <a asp-action="Customers" asp-route-format="csv" class="btn btn-outline-success btn-sm" title="Export CSV"><i class="bi bi-download"></i> CSV</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lead Report Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card crm-card p-4 h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="p-3 bg-info bg-opacity-10 text-info rounded-3">
+                    <i class="bi bi-funnel-fill fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Lead Generation</h5>
+                    <small class="text-muted">Source & qualification</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-4">Track prospective lead acquisition channels, qualification status, expected values and conversions.</p>
+            <div class="mt-auto d-flex gap-2">
+                <a asp-action="Leads" class="btn btn-outline-primary btn-sm flex-grow-1">View Report</a>
+                <a asp-action="Leads" asp-route-format="csv" class="btn btn-outline-success btn-sm" title="Export CSV"><i class="bi bi-download"></i> CSV</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline Report Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card crm-card p-4 h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="p-3 bg-success bg-opacity-10 text-success rounded-3">
+                    <i class="bi bi-bar-chart-steps fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Sales Pipeline</h5>
+                    <small class="text-muted">Weighted stage forecast</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-4">Analyze deal stage distributions, total pipeline valuations, and probability-weighted revenue forecasts.</p>
+            <div class="mt-auto d-flex gap-2">
+                <a asp-action="Pipeline" class="btn btn-outline-primary btn-sm flex-grow-1">View Report</a>
+                <a asp-action="Pipeline" asp-route-format="csv" class="btn btn-outline-success btn-sm" title="Export CSV"><i class="bi bi-download"></i> CSV</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow-Up Report Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card crm-card p-4 h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="p-3 bg-warning bg-opacity-10 text-warning rounded-3">
+                    <i class="bi bi-clock-history fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Follow-Up Schedule</h5>
+                    <small class="text-muted">Overdue & pending tasks</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-4">Audit pending, completed, and overdue follow-up communications to maintain active client outreach.</p>
+            <div class="mt-auto">
+                <a asp-action="FollowUps" class="btn btn-outline-primary btn-sm w-100">View Report</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conversion & Win-Loss Card -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card crm-card p-4 h-100">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-3">
+                    <i class="bi bi-pie-chart-fill fs-3"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0">Sales Conversions</h5>
+                    <small class="text-muted">Lead-to-deal win rates</small>
+                </div>
+            </div>
+            <p class="small text-muted mb-4">Inspect conversion success rates from raw leads into closed won deals and revenue outcomes.</p>
+            <div class="mt-auto">
+                <a asp-action="Conversions" class="btn btn-outline-primary btn-sm w-100">View Report</a>
+            </div>
+        </div>
+    </div>
+
+    @if (User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager))
+    {
+        <!-- User Activity Report Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card crm-card p-4 h-100 border-primary">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="p-3 bg-primary text-white rounded-3">
+                        <i class="bi bi-person-check-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">Team Performance</h5>
+                        <small class="text-muted">Rep activity volume</small>
+                    </div>
+                </div>
+                <p class="small text-muted mb-4">Managerial overview of total customers, leads, deals, and activities handled per team member.</p>
+                <div class="mt-auto">
+                    <a asp-action="UserActivity" class="btn btn-primary btn-sm w-100">View Team Activity</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

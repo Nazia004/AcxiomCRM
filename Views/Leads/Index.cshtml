@@ -1,0 +1,152 @@
+@model IEnumerable<Lead>
+@{
+    ViewData["Title"] = "Lead Management";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="fw-bold mb-0">Leads</h3>
+        <p class="text-muted small mb-0">Capture, nurture, qualify, and convert prospective sales opportunities.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary mt-2 mt-md-0">
+        <i class="bi bi-funnel me-1"></i>New Lead
+    </a>
+</div>
+
+<!-- Search & Filters -->
+<div class="card crm-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name, email, company..." />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                @foreach (var s in LeadStatus.All)
+                {
+                    <option value="@s" selected="@(ViewBag.Status == s)">@s</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="priority" class="form-select">
+                <option value="">All Priorities</option>
+                <option value="Low" selected="@(ViewBag.Priority == "Low")">Low</option>
+                <option value="Medium" selected="@(ViewBag.Priority == "Medium")">Medium</option>
+                <option value="High" selected="@(ViewBag.Priority == "High")">High</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-secondary flex-grow-1">
+                <i class="bi bi-filter me-1"></i>Filter
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+            <a asp-controller="Reports" asp-action="Leads" asp-route-format="csv" class="btn btn-outline-success" title="Export CSV">
+                <i class="bi bi-file-earmark-spreadsheet"></i>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Lead Name</th>
+                    <th>Company</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Exp. Value</th>
+                    <th>Assigned To</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        var statusBadge = item.Status switch {
+                            "New" => "bg-primary",
+                            "Contacted" => "bg-info text-dark",
+                            "Qualified" => "bg-warning text-dark",
+                            "Converted" => "bg-success",
+                            "Lost" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+
+                        var priorityBadge = item.Priority switch {
+                            "High" => "text-danger bg-danger-subtle border border-danger",
+                            "Medium" => "text-warning bg-warning-subtle border border-warning",
+                            _ => "text-secondary bg-secondary-subtle"
+                        };
+
+                        <tr>
+                            <td><span class="badge bg-light text-dark border font-monospace">@item.LeadCode</span></td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.LeadId" class="fw-semibold text-decoration-none">
+                                    @item.LeadName
+                                </a>
+                                <div class="small text-muted">@item.Email | @item.Phone</div>
+                            </td>
+                            <td>@(item.CompanyName ?? "—")</td>
+                            <td><span class="badge badge-status @statusBadge">@item.Status</span></td>
+                            <td><span class="badge @priorityBadge">@item.Priority</span></td>
+                            <td class="fw-bold text-dark">@item.ExpectedValue.ToString("C0")</td>
+                            <td><small>@(item.AssignedUser?.FullName ?? "Unassigned")</small></td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    @if (item.Status != LeadStatus.Converted)
+                                    {
+                                        <a asp-action="Convert" asp-route-id="@item.LeadId" class="btn btn-outline-success" title="Convert to Customer & Deal">
+                                            <i class="bi bi-arrow-repeat"></i>
+                                        </a>
+                                    }
+                                    <a asp-action="Details" asp-route-id="@item.LeadId" class="btn btn-outline-secondary" title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.LeadId" class="btn btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.LeadId" class="btn btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-funnel fs-2 d-block mb-2"></i>
+                            No leads found matching your criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-2">
+            <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages (@ViewBag.TotalCount total records)</span>
+            <ul class="pagination pagination-sm mb-0">
+                @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                {
+                    <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status" asp-route-priority="@ViewBag.Priority">@p</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>

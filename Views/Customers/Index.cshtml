@@ -1,0 +1,131 @@
+@model IEnumerable<Customer>
+@{
+    ViewData["Title"] = "Customer Management";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="fw-bold mb-0">Customers</h3>
+        <p class="text-muted small mb-0">Manage customer accounts, contacts, and relationship records.</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary mt-2 mt-md-0">
+        <i class="bi bi-person-plus-fill me-1"></i>New Customer
+    </a>
+</div>
+
+<!-- Search & Filters -->
+<div class="card crm-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Search by name, email, phone, company..." />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="Active" selected="@(ViewBag.Status == "Active")">Active</option>
+                <option value="Inactive" selected="@(ViewBag.Status == "Inactive")">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-secondary flex-grow-1">
+                <i class="bi bi-filter me-1"></i>Filter
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+            <a asp-controller="Reports" asp-action="Customers" asp-route-format="csv" class="btn btn-outline-success" title="Export CSV">
+                <i class="bi bi-file-earmark-spreadsheet"></i>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Customers Table -->
+<div class="card crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Customer Name</th>
+                    <th>Contact Info</th>
+                    <th>Company</th>
+                    <th>Status</th>
+                    <th>Assigned Owner</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><span class="badge bg-light text-dark border font-monospace">@item.CustomerCode</span></td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@item.CustomerId" class="fw-semibold text-decoration-none">
+                                    @item.CustomerName
+                                </a>
+                                @if (!string.IsNullOrEmpty(item.City))
+                                {
+                                    <div class="small text-muted"><i class="bi bi-geo-alt"></i> @item.City, @item.State</div>
+                                }
+                            </td>
+                            <td>
+                                <div><i class="bi bi-envelope small text-muted me-1"></i><a href="mailto:@item.Email" class="text-muted">@item.Email</a></div>
+                                <div><i class="bi bi-telephone small text-muted me-1"></i><span class="text-muted">@item.Phone</span></div>
+                            </td>
+                            <td>@(item.CompanyName ?? "—")</td>
+                            <td>
+                                <span class="badge badge-status @(item.Status == "Active" ? "bg-success" : "bg-secondary")">
+                                    @item.Status
+                                </span>
+                            </td>
+                            <td>
+                                <small>@(item.Owner?.FullName ?? item.CreatedBy ?? "Unassigned")</small>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@item.CustomerId" class="btn btn-outline-secondary" title="Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.CustomerId" class="btn btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.CustomerId" class="btn btn-outline-danger" title="Deactivate">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-person-x fs-2 d-block mb-2"></i>
+                            No customers found matching your criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-2">
+            <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages (@ViewBag.TotalCount total records)</span>
+            <ul class="pagination pagination-sm mb-0">
+                @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                {
+                    <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-search="@ViewBag.Search" asp-route-status="@ViewBag.Status">@p</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>

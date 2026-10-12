@@ -1,0 +1,46 @@
+@model IEnumerable<dynamic>
+@{
+    ViewData["Title"] = "User Activity Report";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0">Team Performance & Activity Report</h3>
+        <p class="text-muted small mb-0">Total volume of CRM records and engagement touchpoints managed per user.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+<div class="card crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Sales Representative</th>
+                    <th>Email</th>
+                    <th class="text-center">Customers</th>
+                    <th class="text-center">Leads</th>
+                    <th class="text-center">Deals</th>
+                    <th class="text-center">Follow-Ups</th>
+                    <th class="text-center">Activities</th>
+                    <th class="text-center">Total Volume</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.User.FullName</td>
+                        <td>@item.User.Email</td>
+                        <td class="text-center"><span class="badge bg-light text-dark border">@item.Customers</span></td>
+                        <td class="text-center"><span class="badge bg-light text-dark border">@item.Leads</span></td>
+                        <td class="text-center"><span class="badge bg-light text-dark border">@item.Opportunities</span></td>
+                        <td class="text-center"><span class="badge bg-light text-dark border">@item.FollowUps</span></td>
+                        <td class="text-center"><span class="badge bg-light text-dark border">@item.Activities</span></td>
+                        <td class="text-center"><span class="badge bg-primary fs-6">@item.Total</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

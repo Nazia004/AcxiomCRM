@@ -1,0 +1,122 @@
+@model FollowUp
+@{
+    ViewData["Title"] = "Edit Follow-Up";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card crm-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Edit / Reschedule Follow-Up</h4>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+            </div>
+
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="FollowUpId" />
+                <input type="hidden" asp-for="CreatedDate" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="Subject" class="form-label fw-semibold small"></label> <span class="text-danger">*</span>
+                        <input asp-for="Subject" class="form-control" />
+                        <span asp-validation-for="Subject" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="FollowUpDate" class="form-label fw-semibold small"></label> <span class="text-danger">*</span>
+                        <input asp-for="FollowUpDate" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="FollowUpDate" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="FollowUpType" class="form-label fw-semibold small"></label>
+                        <select asp-for="FollowUpType" class="form-select">
+                            <option value="Call">Call</option>
+                            <option value="Meeting">Meeting</option>
+                            <option value="Email">Email</option>
+                            <option value="Demo">Demo</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CustomerId" class="form-label fw-semibold small">Related Customer</label>
+                        <select asp-for="CustomerId" class="form-select">
+                            <option value="">-- None / Select Customer --</option>
+                            @if (ViewBag.Customers != null)
+                            {
+                                @foreach (var c in (IEnumerable<Customer>)ViewBag.Customers)
+                                {
+                                    <option value="@c.CustomerId" selected="@(Model.CustomerId == c.CustomerId)">@c.CustomerName (@c.CustomerCode)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LeadId" class="form-label fw-semibold small">Related Lead</label>
+                        <select asp-for="LeadId" class="form-select">
+                            <option value="">-- None / Select Lead --</option>
+                            @if (ViewBag.Leads != null)
+                            {
+                                @foreach (var l in (IEnumerable<Lead>)ViewBag.Leads)
+                                {
+                                    <option value="@l.LeadId" selected="@(Model.LeadId == l.LeadId)">@l.LeadName (@l.LeadCode)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Status" class="form-label fw-semibold small"></label>
+                        <select asp-for="Status" class="form-select">
+                            @foreach (var s in FollowUpStatus.All)
+                            {
+                                <option value="@s" selected="@(Model.Status == s)">@s</option>
+                            }
+                        </select>
+                    </div>
+
+                    @if (User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="AssignedTo" class="form-label fw-semibold small">Assigned To</label>
+                            <select asp-for="AssignedTo" class="form-select">
+                                <option value="">-- Unassigned --</option>
+                                @if (ViewBag.Users != null)
+                                {
+                                    @foreach (var u in (IEnumerable<ApplicationUser>)ViewBag.Users)
+                                    {
+                                        <option value="@u.Id" selected="@(Model.AssignedTo == u.Id)">@u.FullName (@u.Email)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="AssignedTo" />
+                    }
+
+                    <div class="col-12">
+                        <label asp-for="Remarks" class="form-label fw-semibold small"></label>
+                        <textarea asp-for="Remarks" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

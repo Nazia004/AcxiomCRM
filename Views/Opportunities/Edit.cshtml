@@ -1,0 +1,124 @@
+@model Opportunity
+@{
+    ViewData["Title"] = "Edit Opportunity";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card crm-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Opportunity: @Model.OpportunityName</h4>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+            </div>
+
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="OpportunityId" />
+                <input type="hidden" asp-for="CreatedDate" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="OpportunityName" class="form-label fw-semibold small"></label> <span class="text-danger">*</span>
+                        <input asp-for="OpportunityName" class="form-control" />
+                        <span asp-validation-for="OpportunityName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CustomerId" class="form-label fw-semibold small">Customer Account</label> <span class="text-danger">*</span>
+                        <select asp-for="CustomerId" class="form-select">
+                            @if (ViewBag.Customers != null)
+                            {
+                                @foreach (var c in (IEnumerable<Customer>)ViewBag.Customers)
+                                {
+                                    <option value="@c.CustomerId" selected="@(Model.CustomerId == c.CustomerId)">@c.CustomerName (@c.CustomerCode)</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Amount" class="form-label fw-semibold small"></label> <span class="text-danger">*</span>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="Amount" class="form-control" type="number" min="1" step="0.01" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Stage" class="form-label fw-semibold small"></label>
+                        <select asp-for="Stage" class="form-select" id="stageSelect">
+                            @foreach (var stg in OpportunityStage.All)
+                            {
+                                <option value="@stg" selected="@(Model.Stage == stg)">@stg</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Stage" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Probability" class="form-label fw-semibold small"></label> (0-100%)
+                        <input asp-for="Probability" class="form-control" type="number" min="0" max="100" id="probInput" />
+                        <span asp-validation-for="Probability" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="ExpectedCloseDate" class="form-label fw-semibold small"></label> <span class="text-danger">*</span>
+                        <input asp-for="ExpectedCloseDate" class="form-control" type="date" />
+                        <span asp-validation-for="ExpectedCloseDate" class="text-danger small"></span>
+                    </div>
+
+                    @if (User.IsInRole(UserRoles.Admin) || User.IsInRole(UserRoles.Manager))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="AssignedTo" class="form-label fw-semibold small">Opportunity Owner</label>
+                            <select asp-for="AssignedTo" class="form-select">
+                                <option value="">-- Unassigned --</option>
+                                @if (ViewBag.Users != null)
+                                {
+                                    @foreach (var u in (IEnumerable<ApplicationUser>)ViewBag.Users)
+                                    {
+                                        <option value="@u.Id" selected="@(Model.AssignedTo == u.Id)">@u.FullName (@u.Email)</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="hidden" asp-for="AssignedTo" />
+                    }
+
+                    <div class="col-12">
+                        <label asp-for="Notes" class="form-label fw-semibold small"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('stageSelect').addEventListener('change', function () {
+            const prob = document.getElementById('probInput');
+            if (this.value === 'Qualification') prob.value = 20;
+            else if (this.value === 'Proposal') prob.value = 50;
+            else if (this.value === 'Negotiation') prob.value = 80;
+            else if (this.value === 'Won') prob.value = 100;
+            else if (this.value === 'Lost') prob.value = 0;
+        });
+    </script>
+}

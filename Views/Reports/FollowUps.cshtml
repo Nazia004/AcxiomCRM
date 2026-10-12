@@ -1,0 +1,66 @@
+@model IEnumerable<FollowUp>
+@{
+    ViewData["Title"] = "Follow-Up Report";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-0">Follow-Up Activity Report</h3>
+        <p class="text-muted small mb-0">Review past, pending, and scheduled client outreach touchpoints.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+</div>
+
+<div class="card crm-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select name="status" class="form-select form-select-sm">
+                <option value="">All Statuses</option>
+                @foreach (var s in FollowUpStatus.All)
+                {
+                    <option value="@s" selected="@(ViewBag.Status == s)">@s</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="timeframe" class="form-select form-select-sm">
+                <option value="">All Time</option>
+                <option value="Upcoming" selected="@(ViewBag.Timeframe == "Upcoming")">Upcoming</option>
+                <option value="Overdue" selected="@(ViewBag.Timeframe == "Overdue")">Overdue</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-secondary btn-sm w-100">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Related To</th>
+                    <th>Date & Time</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var f in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@f.Subject</td>
+                        <td>@(f.Customer?.CustomerName ?? f.Lead?.LeadName ?? "General")</td>
+                        <td>@f.FollowUpDate.ToString("g")</td>
+                        <td><span class="badge bg-secondary">@f.FollowUpType</span></td>
+                        <td><span class="badge @(f.Status == "Completed" ? "bg-success" : "bg-warning text-dark")">@f.Status</span></td>
+                        <td>@(f.AssignedUser?.FullName ?? "Unassigned")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

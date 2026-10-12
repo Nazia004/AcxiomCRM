@@ -1,0 +1,46 @@
+@model Opportunity
+@{
+    ViewData["Title"] = "Delete Opportunity";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card crm-card p-4 border-danger">
+            <div class="text-center mb-3">
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i>
+                <h4 class="fw-bold mt-2">Delete Opportunity</h4>
+                <p class="text-muted small">Are you sure you want to delete this opportunity? It will be removed from all sales pipeline forecasts.</p>
+            </div>
+
+            <div class="bg-light p-3 rounded mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">Deal Name:</span>
+                    <strong class="small">@Model.OpportunityName</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">Customer:</span>
+                    <span class="small">@(Model.Customer?.CustomerName ?? "—")</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted small">Amount:</span>
+                    <span class="fw-bold text-primary small">@Model.Amount.ToString("C0")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted small">Stage:</span>
+                    <span class="badge bg-primary">@Model.Stage</span>
+                </div>
+            </div>
+
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="OpportunityId" />
+                <div class="d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill me-1"></i>Confirm Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

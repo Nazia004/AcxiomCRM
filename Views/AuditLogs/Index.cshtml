@@ -1,0 +1,130 @@
+@model IEnumerable<AuditLog>
+@{
+    ViewData["Title"] = "Audit Trail";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+    <div>
+        <h3 class="fw-bold mb-0">System & Business Audit Trail</h3>
+        <p class="text-muted small mb-0">Append-only compliance log capturing security events, CRM record mutations, and role modifications.</p>
+    </div>
+    <span class="badge bg-secondary p-2"><i class="bi bi-lock-fill me-1"></i>Immutable Append-Only Log</span>
+</div>
+
+<!-- Filters -->
+<div class="card crm-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select name="entityFilter" class="form-select">
+                <option value="">All Entities / Modules</option>
+                <option value="Customer" selected="@(ViewBag.EntityFilter == "Customer")">Customer</option>
+                <option value="Lead" selected="@(ViewBag.EntityFilter == "Lead")">Lead</option>
+                <option value="Opportunity" selected="@(ViewBag.EntityFilter == "Opportunity")">Opportunity</option>
+                <option value="FollowUp" selected="@(ViewBag.EntityFilter == "FollowUp")">FollowUp</option>
+                <option value="Activity" selected="@(ViewBag.EntityFilter == "Activity")">Activity</option>
+                <option value="Authentication" selected="@(ViewBag.EntityFilter == "Authentication")">Authentication</option>
+                <option value="UserManagement" selected="@(ViewBag.EntityFilter == "UserManagement")">UserManagement</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="actionFilter" value="@ViewBag.ActionFilter" class="form-control" placeholder="Filter by action (e.g. Login, Create)..." />
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="userFilter" value="@ViewBag.UserFilter" class="form-control" placeholder="User email or ID..." />
+        </div>
+        <div class="col-md-2">
+            <select name="timeframe" class="form-select">
+                <option value="">All Time</option>
+                <option value="Today" selected="@(ViewBag.Timeframe == "Today")">Today</option>
+                <option value="ThisWeek" selected="@(ViewBag.Timeframe == "ThisWeek")">Past 7 Days</option>
+                <option value="ThisMonth" selected="@(ViewBag.Timeframe == "ThisMonth")">Past 30 Days</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-secondary flex-grow-1">Filter</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="card crm-card">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Timestamp (UTC)</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Record ID</th>
+                    <th>Result</th>
+                    <th>IP Address</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var log in Model)
+                    {
+                        var actionBadge = log.Action switch {
+                            "Login" => "bg-success",
+                            "Failed Login" or "Account Lockout" => "bg-danger",
+                            "Create" or "Create Customer" or "Create Lead" or "Create Opportunity" => "bg-primary",
+                            "Lead Conversion" => "bg-info text-dark",
+                            "Delete" or "Delete Customer" or "Delete Lead" => "bg-danger",
+                            "Role Change" => "bg-warning text-dark",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td><small class="font-monospace">@log.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</small></td>
+                            <td>
+                                <span class="fw-semibold small">@(log.UserName ?? "System")</span>
+                            </td>
+                            <td><span class="badge @actionBadge" style="font-size: 0.72rem;">@log.Action</span></td>
+                            <td><span class="badge bg-light text-dark border">@log.EntityName</span></td>
+                            <td><span class="small font-monospace">@(log.RecordId ?? "—")</span></td>
+                            <td>
+                                <span class="badge @(log.Result == "Success" ? "bg-success-subtle text-success border border-success" : "bg-danger-subtle text-danger border border-danger")">
+                                    @(log.Result ?? "Success")
+                                </span>
+                            </td>
+                            <td><small class="text-muted font-monospace">@(log.IpAddress ?? "127.0.0.1")</small></td>
+                            <td>
+                                <span class="small text-muted text-break" style="max-width: 300px; display: inline-block;">
+                                    @(log.Details ?? log.NewValue ?? "—")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-shield-check fs-2 d-block mb-2"></i>
+                            No audit log entries matching your criteria.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (ViewBag.TotalPages > 1)
+    {
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center py-2">
+            <span class="small text-muted">Page @ViewBag.CurrentPage of @ViewBag.TotalPages (@ViewBag.TotalCount total log entries)</span>
+            <ul class="pagination pagination-sm mb-0">
+                @for (int p = 1; p <= ViewBag.TotalPages; p++)
+                {
+                    <li class="page-item @(p == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@p" asp-route-entityFilter="@ViewBag.EntityFilter" asp-route-actionFilter="@ViewBag.ActionFilter" asp-route-userFilter="@ViewBag.UserFilter" asp-route-timeframe="@ViewBag.Timeframe">@p</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>

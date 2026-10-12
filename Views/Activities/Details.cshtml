@@ -1,0 +1,51 @@
+@model Activity
+@{
+    ViewData["Title"] = "Activity Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card crm-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-card-checklist text-info me-2"></i>Activity Details</h4>
+                <div class="d-flex gap-2">
+                    <a asp-action="Edit" asp-route-id="@Model.ActivityId" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Back</a>
+                </div>
+            </div>
+
+            <div class="bg-light p-3 rounded mb-3">
+                <h5 class="fw-bold mb-1">@Model.Subject</h5>
+                <span class="badge bg-primary me-2">@Model.ActivityType</span>
+                <span class="badge @(Model.Status == "Completed" ? "bg-success" : "bg-secondary")">@Model.Status</span>
+            </div>
+
+            <dl class="row small mb-0">
+                <dt class="col-sm-4 text-muted">Activity Date</dt>
+                <dd class="col-sm-8 fw-semibold">@Model.ActivityDate.ToString("f")</dd>
+
+                <dt class="col-sm-4 text-muted">Related Entity</dt>
+                <dd class="col-sm-8">
+                    @if (Model.Customer != null)
+                    {
+                        <span>Customer: <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.CustomerId">@Model.Customer.CustomerName</a></span>
+                    }
+                    else if (Model.Lead != null)
+                    {
+                        <span>Lead: <a asp-controller="Leads" asp-action="Details" asp-route-id="@Model.LeadId">@Model.Lead.LeadName</a></span>
+                    }
+                    else
+                    {
+                        <span>General Activity</span>
+                    }
+                </dd>
+
+                <dt class="col-sm-4 text-muted">Logged By</dt>
+                <dd class="col-sm-8">@(Model.AssignedUser?.FullName ?? "System")</dd>
+
+                <dt class="col-sm-4 text-muted">Description / Notes</dt>
+                <dd class="col-sm-8 text-break">@(string.IsNullOrEmpty(Model.Description) ? "No notes recorded." : Model.Description)</dd>
+            </dl>
+        </div>
+    </div>
+</div>
